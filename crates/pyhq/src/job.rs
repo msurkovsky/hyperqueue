@@ -3,6 +3,7 @@ use hyperqueue::client::status::Status;
 use hyperqueue::common::arraydef::IntArray;
 use hyperqueue::common::utils::fs::get_current_dir;
 use hyperqueue::server::job::JobTaskState;
+use hyperqueue::tako::common::resources::NumOfNodes;
 use hyperqueue::tako::messages::common::{ProgramDefinition, StdioDef};
 use hyperqueue::transfer::messages::{
     FromClientMessage, IdSelector, JobDescription as HqJobDescription, JobDetailRequest, PinMode,
@@ -19,6 +20,7 @@ use crate::{borrow_mut, run_future, ContextPtr, FromPyObject, PyJobId, PyTaskId}
 
 #[derive(Debug, FromPyObject)]
 pub struct ResourceRequestDescription {
+    n_nodes: NumOfNodes,
     cpus: String,
 }
 
@@ -97,6 +99,7 @@ fn build_task_desc(desc: TaskDescription, submit_dir: &Path) -> anyhow::Result<H
 
     let resources = if let Some(rs) = desc.resource_request {
         tako::messages::gateway::ResourceRequest {
+            n_nodes: rs.n_nodes,
             cpus: parse_cpu_request(&rs.cpus)?,
             ..Default::default()
         }
